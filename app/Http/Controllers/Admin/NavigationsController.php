@@ -70,19 +70,34 @@ class NavigationsController extends BaseController
 
         $data['parents']=$parents;
 
-        $events = DB::table('events')
-        ->whereNull('deleted_at')
-        ->where('school_id', $this->app['school']->id)
-        ->orderBy('created_at','desc')
-        ->get();
-
-        $data['events']=$events;
+     
 
         $data['routings'] = DB::table('routings')
-        ->where('school_id', $this->app['school']->id)
-        ->whereIn('entity', ['pages','posts'])
-        ->orderBy('entity')
-        ->orderBy('title')
+        ->leftJoin('pages', function ($join) {
+            $join->on('pages.id', '=', 'routings.entity_id')
+                 ->where('routings.entity', '=', 'pages');
+        })
+        ->leftJoin('posts', function ($join) {
+            $join->on('posts.id', '=', 'routings.entity_id')
+                 ->where('routings.entity', '=', 'posts');
+        })
+        ->where('routings.school_id', $this->app['school']->id)
+        ->whereIn('routings.entity', ['pages','posts'])
+        ->where(function ($query) {
+            $query->where(function ($q) {
+                $q->where('routings.entity', 'pages')
+                  ->whereNotNull('pages.id')
+                  ->whereNull('pages.deleted_at');
+            })->orWhere(function ($q) {
+                $q->where('routings.entity', 'posts')
+                  ->whereNotNull('posts.id')
+                  ->where('posts.is_published', 1)
+                  ->whereNull('posts.deleted_at');
+            });
+        })
+        ->orderBy('routings.entity')
+        ->orderBy('routings.title')
+        ->select('routings.*')
         ->get();
 
         $data['selected_routing_id'] = $navigation->routing_id;
@@ -128,19 +143,32 @@ class NavigationsController extends BaseController
 
         $data['parents']=$parents;
 
-        $events = DB::table('events')
-        ->whereNull('deleted_at')
-        ->where('school_id', $this->app['school']->id)
-        ->orderBy('created_at','desc')
-        ->get();
-
-        $data['events']=$events;
-
         $data['routings'] = DB::table('routings')
-        ->where('school_id', $this->app['school']->id)
-        ->whereIn('entity', ['pages','posts'])
-        ->orderBy('entity')
-        ->orderBy('title')
+        ->leftJoin('pages', function ($join) {
+            $join->on('pages.id', '=', 'routings.entity_id')
+                 ->where('routings.entity', '=', 'pages');
+        })
+        ->leftJoin('posts', function ($join) {
+            $join->on('posts.id', '=', 'routings.entity_id')
+                 ->where('routings.entity', '=', 'posts');
+        })
+        ->where('routings.school_id', $this->app['school']->id)
+        ->whereIn('routings.entity', ['pages','posts'])
+        ->where(function ($query) {
+            $query->where(function ($q) {
+                $q->where('routings.entity', 'pages')
+                  ->whereNotNull('pages.id')
+                  ->whereNull('pages.deleted_at');
+            })->orWhere(function ($q) {
+                $q->where('routings.entity', 'posts')
+                  ->whereNotNull('posts.id')
+                  ->where('posts.is_published', 1)
+                  ->whereNull('posts.deleted_at');
+            });
+        })
+        ->orderBy('routings.entity')
+        ->orderBy('routings.title')
+        ->select('routings.*')
         ->get();
 
 

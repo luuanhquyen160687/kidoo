@@ -83,52 +83,8 @@
 
 
                   </div>
-                  <div style="display:none" class="p-4 code-to-copy navigation_referent_form" id="events_form">
-                    
-
-                  <center><h6>Chuyển hướng sang 1 sự kiện - chọn sự kiện sẽ được chuyển đến</h6></center>
-                      <div class="form-floating form-floating-advance-select mb-3">
-                        <label for="floaTingLabelSingleSelect">Single</label>
-                        <select name="event_id" class="form-select" id="floaTingLabelSingleSelect" data-choices="data-choices" data-options='{"removeItemButton":true,"placeholder":true}'>
-                          <option value=''>Chọn tin</option>
-                          <?php
-                          foreach ($events as $post)
-                          {
-                          ?>   
-                          <option value="<?php echo $post->id;?>"><?php echo $post->title;?></option>
-                          <?php
-                          }
-                          ?>
-                        </select> 
-                        <div class="invalid-feedback"></div>
-                      </div>
-
-
-                  </div>
-                  <div style="display:none" class="p-4 code-to-copy navigation_referent_form" id="listing_posts_form">
-                      <center>
-                        <h6>Điều hướng đến trang chủ tin tức</h6>
-                        <a href="https://<?php echo $app['school']->domain;?>/news">Tin tức</a>
-                      </center>
-                  </div>
-                  <div style="display:none" class="p-4 code-to-copy navigation_referent_form" id="listing_events_form">
-                      <center>
-                        <h6>Điều hướng đến trang chủ sự kiện</h6>
-                        <a href="https://<?php echo $app['school']->domain;?>/events">Sự kiện</a>
-                      </center>
-                  </div>
-                  <div style="display:none" class="p-4 code-to-copy navigation_referent_form" id="contact_page_form">
-                      <center><h6>Điều hướng đến trang liên hệ</h6>
-                          <a href="https://<?php echo $app['school']->domain;?>/contact">Liên hệ</a>
-                      </center>
-                  </div>
-                  <div style="display:none" class="p-4 code-to-copy navigation_referent_form" id="url_form">
-                      <div class="form-floating">
-                      <input class="form-control" name="url" id="floatingInputGrid" type="text" placeholder="Project title">
-                      <label for="floatingInputGrid">Url</label>
-                      <div class="invalid-feedback"></div> 
-                    </div>
-                  </div>
+                  
+                 
                        
                       </div>
                     </div>

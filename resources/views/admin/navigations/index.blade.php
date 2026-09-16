@@ -13,7 +13,7 @@
     </div>   
 
 
-    <div class="card col-xl-8" > 
+    <div class="card col-xl-12" > 
         
        <div class="card-body">
             <div class="mb-4">
@@ -171,11 +171,7 @@
     </div>
                     
 
-    <div class="col-md-4 col-xl-4 col-xxl-4 gy-5 gy-md-3">  
-                <div class="">
-                  Not defined yet content
-                </div>   
-    </div>
+    
 </div>
 <style>
 #navigation_table tr td {padding:1rem 0rem} 
