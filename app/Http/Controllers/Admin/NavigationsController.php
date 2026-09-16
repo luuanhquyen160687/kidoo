@@ -10,12 +10,44 @@ use Illuminate\Validation\Rule;
 
 class NavigationsController extends BaseController
 {
-    public function index()    
-    {  
+    private function availableRoutingsQuery($school_id)
+    {
+        return DB::table('routings')
+        ->leftJoin('pages', function ($join) {
+            $join->on('pages.id', '=', 'routings.entity_id')
+                 ->where('routings.entity', '=', 'pages');
+        })
+        ->leftJoin('posts', function ($join) {
+            $join->on('posts.id', '=', 'routings.entity_id')
+                 ->where('routings.entity', '=', 'posts');
+        })
+        ->where('routings.school_id', $school_id)
+        ->whereIn('routings.entity', ['pages','posts'])
+        ->where(function ($query) {
+            $query->where(function ($q) {
+                $q->where('routings.entity', 'pages')
+                  ->whereNotNull('pages.id')
+                  ->whereNull('pages.deleted_at');
+            })->orWhere(function ($q) {
+                $q->where('routings.entity', 'posts')
+                  ->whereNotNull('posts.id')
+                  ->where('posts.is_published', 1)
+                  ->whereNull('posts.deleted_at');
+            });
+        })
+        ->orderBy('routings.entity')
+        ->orderBy('routings.title')
+        ->select('routings.*');
+    }
+
+    public function index()
+    {
+        $school_id = $this->app['school']->id;
+
         $parents = DB::table('navigations')
         ->whereNull('parent_id')
         ->whereNull('deleted_at')
-        ->where('school_id', $this->app['school']->id)
+        ->where('school_id', $school_id)
         ->orderBy('sort')
         ->orderBy('created_at','desc')
         ->get();
@@ -23,7 +55,7 @@ class NavigationsController extends BaseController
         $children = DB::table('navigations')
         ->whereNotNull('parent_id')
         ->whereNull('deleted_at')
-        ->where('school_id', $this->app['school']->id)
+        ->where('school_id', $school_id)
         ->orderBy('parent_id')
         ->orderBy('sort')
         ->get()
@@ -37,20 +69,19 @@ class NavigationsController extends BaseController
                 'children' => $children->get($parent->id, collect())->values(),
             ];
         });
-      //  echo "<pre>";
-       // print_r($navigations);
-       // die();
 
-        $data['navigations']=$navigations; 
-        return view('admin.navigations.index',$data); 
-    }  
+        $data['navigations']=$navigations;
+        $data['parents']=$parents;
+        $data['routings']=$this->availableRoutingsQuery($school_id)->get();
+        return view('admin.navigations.index',$data);
+    }
     public function show($id)
     {
          $teacher = DB::table('users')
         ->where('school_id', $this->app['school']->id)
-        ->where('id', $id) 
+        ->where('id', $id)
         ->first();
-        $data['teacher']=$teacher; 
+        $data['teacher']=$teacher;
         return view('admin.navigations.show',$data);
     }
     public function edit($id){
@@ -59,52 +90,17 @@ class NavigationsController extends BaseController
         ->where('school_id', $this->app['school']->id)
         ->where('id', $id)
         ->first();
-        $data['navigation']=$navigation;
 
-        $parents = DB::table('navigations')
-        ->whereNull('parent_id')
-        ->whereNull('deleted_at')
-        ->where('school_id', $this->app['school']->id)
-        ->orderBy('sort')
-        ->get();
+        abort_if(!$navigation, 404);
 
-        $data['parents']=$parents;
-
-     
-
-        $data['routings'] = DB::table('routings')
-        ->leftJoin('pages', function ($join) {
-            $join->on('pages.id', '=', 'routings.entity_id')
-                 ->where('routings.entity', '=', 'pages');
-        })
-        ->leftJoin('posts', function ($join) {
-            $join->on('posts.id', '=', 'routings.entity_id')
-                 ->where('routings.entity', '=', 'posts');
-        })
-        ->where('routings.school_id', $this->app['school']->id)
-        ->whereIn('routings.entity', ['pages','posts'])
-        ->where(function ($query) {
-            $query->where(function ($q) {
-                $q->where('routings.entity', 'pages')
-                  ->whereNotNull('pages.id')
-                  ->whereNull('pages.deleted_at');
-            })->orWhere(function ($q) {
-                $q->where('routings.entity', 'posts')
-                  ->whereNotNull('posts.id')
-                  ->where('posts.is_published', 1)
-                  ->whereNull('posts.deleted_at');
-            });
-        })
-        ->orderBy('routings.entity')
-        ->orderBy('routings.title')
-        ->select('routings.*')
-        ->get();
-
-        $data['selected_routing_id'] = $navigation->routing_id;
-
-        return view('admin.navigations.edit',$data);
+        return response()->json([
+            'id' => $navigation->id,
+            'name' => $navigation->name,
+            'parent_id' => $navigation->parent_id,
+            'routing_id' => $navigation->routing_id,
+        ]);
     }
-   
+
     public function update($id,Request $request){
          $validator = Validator::make($request->all(), [
         'name' => 'required|min:5',
@@ -117,60 +113,31 @@ class NavigationsController extends BaseController
             ], 422);
         }
 
-     
+
         DB::table('navigations')
         ->where('id', $id)
         ->update([
                 'name' => $request->get('name'),
+                'parent_id' => $request->get('parent_id'),
                 'routing_id'=> $request->get('routing_id'),
-                'updated_at' => now(), 
+                'updated_at' => now(),
         ]);
 
-
-
-
-        return redirect()->route('navigations.show', $id)
-                     ->with('success', 'Post created!');
+        return response()->json(['status' => 'ok']);
     }
     public function create()
     {
+        $school_id = $this->app['school']->id;
+
         $parents = DB::table('navigations')
         ->whereNull('parent_id')
         ->whereNull('deleted_at')
-        ->where('school_id', $this->app['school']->id)
+        ->where('school_id', $school_id)
         ->orderBy('sort')
         ->get();
 
         $data['parents']=$parents;
-
-        $data['routings'] = DB::table('routings')
-        ->leftJoin('pages', function ($join) {
-            $join->on('pages.id', '=', 'routings.entity_id')
-                 ->where('routings.entity', '=', 'pages');
-        })
-        ->leftJoin('posts', function ($join) {
-            $join->on('posts.id', '=', 'routings.entity_id')
-                 ->where('routings.entity', '=', 'posts');
-        })
-        ->where('routings.school_id', $this->app['school']->id)
-        ->whereIn('routings.entity', ['pages','posts'])
-        ->where(function ($query) {
-            $query->where(function ($q) {
-                $q->where('routings.entity', 'pages')
-                  ->whereNotNull('pages.id')
-                  ->whereNull('pages.deleted_at');
-            })->orWhere(function ($q) {
-                $q->where('routings.entity', 'posts')
-                  ->whereNotNull('posts.id')
-                  ->where('posts.is_published', 1)
-                  ->whereNull('posts.deleted_at');
-            });
-        })
-        ->orderBy('routings.entity')
-        ->orderBy('routings.title')
-        ->select('routings.*')
-        ->get();
-
+        $data['routings']=$this->availableRoutingsQuery($school_id)->get();
 
         return view('admin.navigations.create',$data);
     }
@@ -189,9 +156,9 @@ class NavigationsController extends BaseController
                 'errors' => $validator->errors()
             ], 422);
         }
-  
-     
-        $navigation_id=DB::table('navigations')->insertGetId([
+
+
+        DB::table('navigations')->insertGetId([
         'name' => $request->get('name'),
         'parent_id' => $request->get('parent_id'),
         'routing_id' => $request->get('routing_id'),
@@ -200,11 +167,7 @@ class NavigationsController extends BaseController
         'updated_at' => now(),
         ]);
 
-         
-       
-
-     return redirect()->route('navigations.index')
-                     ->with('success', 'Post created!');
+        return response()->json(['status' => 'ok']);
     }
  
     public function destroy($id){ 
