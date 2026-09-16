@@ -39,7 +39,7 @@
                                
                                 <div class="about-author">
                                     <div class="about-button wow fadeInUp" data-wow-delay=".3s">
-                                        <a href="/tin-tuc-{{ $post->slug }}" class="theme-btn">
+                                        <a href="/{{ $post->routing_slug }}" class="theme-btn">
                                             Chi tiết <i class="fa-solid fa-arrow-right-long"></i>
                                         </a>
                                     </div>

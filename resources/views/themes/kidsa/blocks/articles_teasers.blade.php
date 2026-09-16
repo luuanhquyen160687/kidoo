@@ -36,7 +36,7 @@
                         
                             <div class="news-single-items">
                                 <div class="news-image">
-                                    <a href="/tin-tuc-{{$post->slug}}">
+                                    <a href="/{{ $post->routing_slug }}">
                                     <img style="max-height:400px; object-fit: cover;object-position: center;" src="/get_photo/{{$post->photo_id}}/500" alt="news-img">
                                     </a>
                                 </div>
@@ -50,7 +50,7 @@
                                         </li>
                                     </ul>
                                     <h3>
-                                        <a href="/tin-tuc-{{$post->slug}}">{{$post->title}}</a>
+                                        <a href="/{{ $post->routing_slug }}">{{$post->title}}</a>
                                     </h3>
                                     <p>
                                         {{$post->summary}}
@@ -65,7 +65,7 @@
                                                 <h6></h6>
                                             </div>
                                         </div>
-                                        <a href="/tin-tuc-{{$post->slug}}" class="theme-btn">
+                                        <a href="/{{ $post->routing_slug }}" class="theme-btn">
                                             Chi tiết <i class="fa-solid fa-arrow-right-long"></i>
                                         </a>
                                     </div>
@@ -84,7 +84,7 @@
                         ?>
                             <div class="news-right-items wow fadeInUp" data-wow-delay=".4s">
                                 <div class="news-thumb col-xl-6"  >
-                                    <a href="/tin-tuc-{{$post->slug}}">
+                                    <a href="/{{ $post->routing_slug }}">
                                     <img style="height:250px;width:300px;object-fit:cover" src="/get_photo/{{$post->photo_id}}/500" alt="img">
                                     </a>
                                 </div>
@@ -98,7 +98,7 @@
                                         </li>
                                     </ul>
                                     <h3>
-                                        <a href="/tin-tuc-{{$post->slug}}">
+                                        <a href="/{{ $post->routing_slug }}">
                                             {{$post->title}}
                                         </a>
                                     </h3>

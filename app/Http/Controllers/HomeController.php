@@ -132,10 +132,14 @@ class HomeController extends BaseController
         {
             $post = DB::table('posts')
             ->leftJoin('categories','categories.id','posts.category_id')
+            ->leftJoin('routings', function ($join) {
+                $join->on('routings.entity_id', '=', 'posts.id')
+                     ->where('routings.entity', '=', 'posts');
+            })
             ->where('posts.school_id', $this->app['school']->id)
             ->where('posts.id', $data['data']['id'])
           //  ->where('posts.is_published',1)
-            ->select('posts.*','categories.name as category_name')
+            ->select('posts.*','categories.name as category_name','routings.slug as routing_slug')
             ->first();
 
            
@@ -148,10 +152,14 @@ class HomeController extends BaseController
             $posts = DB::table('posts')
             ->leftJoin('categories','categories.id','posts.category_id')
             ->leftJoin('users','users.id','posts.user_id')
+            ->leftJoin('routings', function ($join) {
+                $join->on('routings.entity_id', '=', 'posts.id')
+                     ->where('routings.entity', '=', 'posts');
+            })
             ->where('posts.school_id', $this->app['school']->id)
             ->where('posts.is_published',1)
             ->whereNull('posts.deleted_at')
-            ->select('posts.*','categories.name as category_name','users.name as user_name','users.photo_id as user_photo_id');
+            ->select('posts.*','categories.name as category_name','users.name as user_name','users.photo_id as user_photo_id','routings.slug as routing_slug');
     
 
             if($data['data']['posts_collect']=='manual')
@@ -457,8 +465,12 @@ class HomeController extends BaseController
         $post = DB::table('posts')
         ->leftJoin('users','users.id','posts.user_id')
         ->leftJoin('categories','categories.id','posts.category_id')
+        ->leftJoin('routings', function ($join) {
+            $join->on('routings.entity_id', '=', 'posts.id')
+                 ->where('routings.entity', '=', 'posts');
+        })
         ->where('posts.id', $id)
-        ->select('posts.*','users.name as user_name','categories.name as category_name')
+        ->select('posts.*','users.name as user_name','categories.name as category_name','routings.slug as routing_slug')
         ->first();
 
         $this->abortUnlessViewable($post);
@@ -498,7 +510,11 @@ class HomeController extends BaseController
 
         $event = $routing ? DB::table('posts')
         ->join('files', 'posts.photo_id',  'files.id')
-        ->select('posts.*', 'files.path as feature_path')
+        ->leftJoin('routings', function ($join) {
+            $join->on('routings.entity_id', '=', 'posts.id')
+                 ->where('routings.entity', '=', 'posts');
+        })
+        ->select('posts.*', 'files.path as feature_path', 'routings.slug as routing_slug')
         ->where('posts.id', $routing->entity_id)
         ->where('posts.type', 'event')
         ->first() : null;
@@ -523,7 +539,11 @@ class HomeController extends BaseController
 
         $event = DB::table('posts')
         ->join('files', 'posts.photo_id',  'files.id')
-        ->select('posts.*', 'files.path as feature_path')
+        ->leftJoin('routings', function ($join) {
+            $join->on('routings.entity_id', '=', 'posts.id')
+                 ->where('routings.entity', '=', 'posts');
+        })
+        ->select('posts.*', 'files.path as feature_path', 'routings.slug as routing_slug')
         ->where('posts.id', $id)
         ->where('posts.type', 'event')
         ->first();
@@ -558,7 +578,11 @@ class HomeController extends BaseController
 
         $event = DB::table('posts')
         ->join('files', 'posts.photo_id',  'files.id')
-        ->select('posts.*', 'files.path as feature_path')
+        ->leftJoin('routings', function ($join) {
+            $join->on('routings.entity_id', '=', 'posts.id')
+                 ->where('routings.entity', '=', 'posts');
+        })
+        ->select('posts.*', 'files.path as feature_path', 'routings.slug as routing_slug')
         ->where('posts.id', $id)
         ->where('posts.type', 'event')
         ->first();
@@ -599,7 +623,11 @@ class HomeController extends BaseController
         ->where('categories.school_id', $this->app['school']->id)
         ->get();
 
-        $posts = DB::table('posts');
+        $posts = DB::table('posts')
+            ->leftJoin('routings', function ($join) {
+                $join->on('routings.entity_id', '=', 'posts.id')
+                     ->where('routings.entity', '=', 'posts');
+            });
             if(request()->get('danh-muc'))
             {
                 $category = DB::table('categories')
@@ -613,8 +641,8 @@ class HomeController extends BaseController
         $posts->where('posts.type', 'news');
         $posts->where('posts.is_published', 1);
         $posts->whereNull('posts.deleted_at');
-        $posts=$posts->select('posts.*')
-        ->orderBy('created_at','desc')
+        $posts=$posts->select('posts.*', 'routings.slug as routing_slug')
+        ->orderBy('posts.created_at','desc')
         ->paginate(10);
         $posts->getCollection()->each(fn($post) => $post->thumbnail_path = getThumbnailUrl($post->photo_id));
 
@@ -626,11 +654,15 @@ class HomeController extends BaseController
     public function events()
     {
        $posts = DB::table('posts')
+        ->leftJoin('routings', function ($join) {
+            $join->on('routings.entity_id', '=', 'posts.id')
+                 ->where('routings.entity', '=', 'posts');
+        })
         ->whereNotNull('posts.photo_id')
         ->where('posts.type', 'event')
         ->where('posts.is_published', 1)
         ->whereNull('posts.deleted_at')
-        ->select('posts.*')
+        ->select('posts.*', 'routings.slug as routing_slug')
         ->paginate(10);
         $posts->getCollection()->each(fn($post) => $post->thumbnail_path = getThumbnailUrl($post->photo_id));
 
