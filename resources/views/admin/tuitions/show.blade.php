@@ -51,6 +51,8 @@ $type_labels = [
   </div>
 </div>
 
+
+
 <div class="card">
   <div class="card-body">
     <table class="table table-sm">
@@ -95,7 +97,14 @@ $type_labels = [
     </table>
   </div>
 </div>
-
+@if ($tuition->status != 'paid')
+<div class="card mb-4">
+  <div class="card-body text-center">
+    <h5 class="mb-3">Quét mã QR để thanh toán</h5>
+    <img src="https://vietqr.app/img?bank=TPBank&acc=12316061987&template=qronly&amount=10000&des=hocphi-<?php echo $tuition->id;?>&showinfo=true&holder=LUU%20ANH%20QUYEN&store=mamnonbanmai" class="img-fluid" style="max-width: 300px;">
+  </div>
+</div>
+@endif
 @endsection
 
 @section('js')
