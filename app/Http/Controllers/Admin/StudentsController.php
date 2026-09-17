@@ -240,8 +240,17 @@ class StudentsController extends BaseController
             ->take(30)
             ->values();
     }
-    public function edit($id){
+    public function edit($id, Request $request){
          $student = $this->findStudentWithRelations($id);
+
+        if (!$student) {
+            abort(404);
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json($student);
+        }
+
         $data['student']=$student;
         $classes = DB::table('classes')
         ->where('school_id', $this->app['school']->id)

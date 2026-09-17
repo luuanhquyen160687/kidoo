@@ -9,7 +9,7 @@
             </div>
             <div class="col-auto">
               <a href="/admin/students/import" class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0" type="button">Import</a>
-              <a href="/admin/students/create" class="btn btn-primary mb-2 mb-sm-0" type="submit">Thêm học sinh</a>
+              <button type="button" class="btn btn-primary mb-2 mb-sm-0" data-bs-toggle="modal" data-bs-target="#create_student_modal">Thêm học sinh</button>
             </div>
     </div>
 
@@ -112,9 +112,9 @@
                       </td>
 
                       <td class="align-middle actions  text-end pe-3">
-                        <a href="/admin/students/{{$student->id}}/edit"  class="btn btn-link text-body-quaternary p-0 me-2">
+                        <button type="button" class="btn btn-link text-body-quaternary p-0 me-2 edit-student-btn" data-student-id="{{ $student->id }}">
                          <span class="fas fa-edit text-body"></span>
-                        </a>
+                        </button>
                         <button data-bs-toggle="offcanvas" data-bs-target="#offcanvas_<?php echo $student->id; ?>" aria-controls="offcanvas_<?php echo $student->id; ?>" class="btn btn-link text-body-quaternary p-0 text-danger"> 
                           <span class="fa-solid fa-trash text-danger"></span> 
                         </button>                 
@@ -159,10 +159,295 @@
 
 
     </div>
-                    
 
-    
+
+
 </div>
+</div>
+
+<div class="modal fade" id="create_student_modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 900px;">
+    <div class="modal-content">
+      <form id="create_student_form" action="{{ route('students.store') }}" method="POST">
+        @csrf
+        <div class="modal-header">
+          <h5 class="modal-title">Thêm học sinh</h5>
+          <button type="button" class="btn btn-close p-1" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input class="form-control" name="name" id="create_student_name" type="text" placeholder="Tên học sinh">
+                <label for="create_student_name">Tên học sinh</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input class="form-control" name="address" id="create_student_address" type="text" placeholder="Địa chỉ">
+                <label for="create_student_address">Địa chỉ</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <select name="gender" class="form-select" id="create_student_gender">
+                  <option value="" selected>Chọn giới tính</option>
+                  <option value="male">Nam</option>
+                  <option value="female">Nữ</option>
+                </select>
+                <label for="create_student_gender">Giới tính</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input name="birthdate" class="form-control datetimepicker flatpickr-input" id="create_student_birthdate" type="text" placeholder="yyyy-mm-dd" data-options="{'enableTime':false,'dateFormat':'y-m-d','disableMobile':true}" readonly="readonly">
+                <label for="create_student_birthdate">Ngày sinh</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <select name="class_id" class="form-select" id="create_student_class_id">
+                  <option value="" selected>Lớp học</option>
+                  <?php foreach ($classes as $class) { ?>
+                  <option value="<?php echo $class->id; ?>"><?php echo $class->name; ?></option>
+                  <?php } ?>
+                </select>
+                <label for="create_student_class_id">Lớp học</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-floating">
+                <input class="form-control" name="tuition_discount" id="create_student_tuition_discount" type="number" min="0" max="100" step="1" placeholder="Giảm học phí">
+                <label for="create_student_tuition_discount">Giảm học phí (%)</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-floating">
+                <input class="form-control" name="tuition_discount_reason" id="create_student_tuition_discount_reason" type="text" placeholder="Lý do giảm học phí">
+                <label for="create_student_tuition_discount_reason">Lý do giảm học phí</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <h6 class="text-body-tertiary mb-0 mt-2">Thông tin bố</h6>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="father_name" id="create_student_father_name" type="text" placeholder="Tên">
+                <label for="create_student_father_name">Tên</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="father_phone" id="create_student_father_phone" type="text" placeholder="Điện thoại">
+                <label for="create_student_father_phone">Điện thoại</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="father_email" id="create_student_father_email" type="text" placeholder="Email">
+                <label for="create_student_father_email">Email</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <h6 class="text-body-tertiary mb-0 mt-2">Thông tin mẹ</h6>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="mother_name" id="create_student_mother_name" type="text" placeholder="Tên">
+                <label for="create_student_mother_name">Tên</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="mother_phone" id="create_student_mother_phone" type="text" placeholder="Điện thoại">
+                <label for="create_student_mother_phone">Điện thoại</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="mother_email" id="create_student_mother_email" type="text" placeholder="Email">
+                <label for="create_student_mother_email">Email</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <h6 class="text-body-tertiary mb-2 mt-2">Ảnh đại diện</h6>
+              @include('admin.components.file_picker', [
+                  'id' => 'create_student_photo_picker',
+                  'name' => 'photo_id',
+                  'label' => 'Chọn ảnh đại diện',
+                  'multiple' => false,
+                  'reopenModal' => 'create_student_modal',
+              ])
+              <div class="invalid-feedback"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-primary">Thêm học sinh</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="edit_student_modal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 900px;">
+    <div class="modal-content">
+      <form id="edit_student_form" method="POST">
+        @csrf
+        @method('PUT')
+        <div class="modal-header">
+          <h5 class="modal-title">Sửa học sinh</h5>
+          <button type="button" class="btn btn-close p-1" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input class="form-control" name="name" id="edit_student_name" type="text" placeholder="Tên học sinh">
+                <label for="edit_student_name">Tên học sinh</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input class="form-control" name="address" id="edit_student_address" type="text" placeholder="Địa chỉ">
+                <label for="edit_student_address">Địa chỉ</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <select name="gender" class="form-select" id="edit_student_gender">
+                  <option value="" selected>Chọn giới tính</option>
+                  <option value="male">Nam</option>
+                  <option value="female">Nữ</option>
+                </select>
+                <label for="edit_student_gender">Giới tính</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input name="birthdate" class="form-control datetimepicker flatpickr-input" id="edit_student_birthdate" type="text" placeholder="yyyy-mm-dd" data-options="{'enableTime':false,'dateFormat':'y-m-d','disableMobile':true}" readonly="readonly">
+                <label for="edit_student_birthdate">Ngày sinh</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <select name="class_id" class="form-select" id="edit_student_class_id">
+                  <option value="" selected>Lớp học</option>
+                  <?php foreach ($classes as $class) { ?>
+                  <option value="<?php echo $class->id; ?>"><?php echo $class->name; ?></option>
+                  <?php } ?>
+                </select>
+                <label for="edit_student_class_id">Lớp học</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-floating">
+                <input class="form-control" name="tuition_discount" id="edit_student_tuition_discount" type="number" min="0" max="100" step="1" placeholder="Giảm học phí">
+                <label for="edit_student_tuition_discount">Giảm học phí (%)</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="form-floating">
+                <input class="form-control" name="tuition_discount_reason" id="edit_student_tuition_discount_reason" type="text" placeholder="Lý do giảm học phí">
+                <label for="edit_student_tuition_discount_reason">Lý do giảm học phí</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <h6 class="text-body-tertiary mb-0 mt-2">Thông tin bố</h6>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="father_name" id="edit_student_father_name" type="text" placeholder="Tên">
+                <label for="edit_student_father_name">Tên</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="father_phone" id="edit_student_father_phone" type="text" placeholder="Điện thoại">
+                <label for="edit_student_father_phone">Điện thoại</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="father_email" id="edit_student_father_email" type="text" placeholder="Email">
+                <label for="edit_student_father_email">Email</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <h6 class="text-body-tertiary mb-0 mt-2">Thông tin mẹ</h6>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="mother_name" id="edit_student_mother_name" type="text" placeholder="Tên">
+                <label for="edit_student_mother_name">Tên</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="mother_phone" id="edit_student_mother_phone" type="text" placeholder="Điện thoại">
+                <label for="edit_student_mother_phone">Điện thoại</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-floating">
+                <input class="form-control" name="mother_email" id="edit_student_mother_email" type="text" placeholder="Email">
+                <label for="edit_student_mother_email">Email</label>
+                <div class="invalid-feedback"></div>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <h6 class="text-body-tertiary mb-2 mt-2">Ảnh đại diện</h6>
+              @include('admin.components.file_picker', [
+                  'id' => 'edit_student_photo_picker',
+                  'name' => 'photo_id',
+                  'label' => 'Chọn ảnh đại diện',
+                  'multiple' => false,
+                  'reopenModal' => 'edit_student_modal',
+              ])
+              <div class="invalid-feedback"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -210,6 +495,116 @@
     if (searchInput) searchInput.addEventListener('keyup', updateCount);
     updateCount();
   })();
+</script>
+
+<script>
+function applyStudentFormErrors($form, errors) {
+    $form.find('.invalid-feedback').html('');
+    $form.find('.form-control, .form-select').removeClass('is-invalid');
+    $.each(errors, function (field, msgs) {
+        $form.find("[name='" + field + "']")
+            .addClass('is-invalid')
+            .siblings('.invalid-feedback').html(msgs[0]);
+    });
+}
+
+function resetStudentForm($form, pickerId) {
+    $form.find('.form-control, .form-select').val('').removeClass('is-invalid');
+    $form.find('.invalid-feedback').html('');
+    $('#' + pickerId).trigger('picker:reset');
+    var birthdateInput = $form.find('.datetimepicker')[0];
+    if (birthdateInput && birthdateInput._flatpickr) {
+        birthdateInput._flatpickr.clear();
+    }
+}
+
+$('#create_student_modal').on('hidden.bs.modal', function () {
+    resetStudentForm($('#create_student_form'), 'create_student_photo_picker');
+});
+
+$('#create_student_form').on('submit', function (e) {
+    e.preventDefault();
+    var $form = $(this);
+
+    $.ajax({
+        url: $form.attr('action'),
+        type: 'POST',
+        data: $form.serialize(),
+        success: function () {
+            window.location.reload();
+        },
+        error: function (xhr) {
+            if (xhr.status === 422) {
+                applyStudentFormErrors($form, xhr.responseJSON.errors);
+            }
+        }
+    });
+});
+
+$(document).on('click', '.edit-student-btn', function () {
+    var studentId = $(this).data('student-id');
+
+    $.ajax({
+        url: '{{ url('/admin/students') }}/' + studentId + '/edit',
+        type: 'GET',
+        dataType: 'json',
+        success: function (student) {
+            var $form = $('#edit_student_form');
+            $form.attr('action', '{{ url('/admin/students') }}/' + studentId);
+            $form.find('.invalid-feedback').html('');
+            $form.find('.form-control, .form-select').removeClass('is-invalid');
+
+            $('#edit_student_name').val(student.name);
+            $('#edit_student_address').val(student.address);
+            $('#edit_student_gender').val(student.gender || '');
+            $('#edit_student_class_id').val(student.class_id || '');
+            $('#edit_student_tuition_discount').val(student.tuition_discount);
+            $('#edit_student_tuition_discount_reason').val(student.tuition_discount_reason);
+            $('#edit_student_father_name').val(student.father_name);
+            $('#edit_student_father_phone').val(student.father_phone);
+            $('#edit_student_father_email').val(student.father_email);
+            $('#edit_student_mother_name').val(student.mother_name);
+            $('#edit_student_mother_phone').val(student.mother_phone);
+            $('#edit_student_mother_email').val(student.mother_email);
+
+            var birthdateInput = document.getElementById('edit_student_birthdate');
+            if (birthdateInput._flatpickr) {
+                birthdateInput._flatpickr.setDate(student.birthdate, true);
+            } else {
+                $(birthdateInput).val(student.birthdate);
+            }
+
+            $('#edit_student_photo_picker').trigger('picker:set', [
+                student.photo_id ? [{ id: student.photo_id, path: student.thumbnail_path }] : []
+            ]);
+
+            $('#edit_student_modal').modal('show');
+        }
+    });
+});
+
+$('#edit_student_modal').on('hidden.bs.modal', function () {
+    resetStudentForm($('#edit_student_form'), 'edit_student_photo_picker');
+});
+
+$('#edit_student_form').on('submit', function (e) {
+    e.preventDefault();
+    var $form = $(this);
+
+    $.ajax({
+        url: $form.attr('action'),
+        type: 'POST',
+        data: $form.serialize(),
+        success: function () {
+            window.location.reload();
+        },
+        error: function (xhr) {
+            if (xhr.status === 422) {
+                applyStudentFormErrors($form, xhr.responseJSON.errors);
+            }
+        }
+    });
+});
 </script>
 
 @endsection
