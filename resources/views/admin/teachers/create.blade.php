@@ -181,7 +181,7 @@
                               {
                               ?>
                               <div class="form-check form-switch">
-                                <input <?php echo ($permission->enable_by_default==1)? "checked":""; ?>  class="form-check-input" name="permissions[]" value='{{$permission->id}}' id="{{$permission->resource}}_input" type="checkbox">
+                                <input <?php echo ($permission->enable_by_default==1)? "checked":""; ?>  class="form-check-input" name="permissions[]" value='{{$permission->permission_id}}' id="{{$permission->resource}}_input" type="checkbox">
                                 <label class="form-check-label" for="{{$permission->resource}}_input">{{$permission->permission_name}}</label> 
                               </div>
                               <?php 

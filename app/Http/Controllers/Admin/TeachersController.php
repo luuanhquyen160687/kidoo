@@ -10,8 +10,8 @@ use Illuminate\Validation\Rule;
 
 class TeachersController extends BaseController
 {
-    public function index()    
-    {  
+    public function index()
+    {
          $teachers = DB::table('users')
         ->select('users.*')
         ->where('users.school_id', $this->app['school']->id)
@@ -20,8 +20,18 @@ class TeachersController extends BaseController
         ->get();
         $teachers->each(fn($teacher) => $teacher->thumbnail_path = getThumbnailUrl($teacher->photo_id));
         $data['teachers']=$teachers;
-        return view('admin.teachers.index',$data); 
-    }  
+
+        $data['permission_groups'] = $this->getPermissionGroupsForCreate();
+        $data['password'] = Str::random(8);
+
+        $data['campuses'] = DB::table('campuses')
+        ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
+        ->orderBy('name')
+        ->get();
+
+        return view('admin.teachers.index',$data);
+    }
     public function show($id)
     {
          $teacher = DB::table('users')
@@ -64,8 +74,43 @@ class TeachersController extends BaseController
 
         return view('admin.teachers.show',$data);
     }
-    public function edit($id){
-        
+    public function edit($id, Request $request){
+
+        $teacher = DB::table('users')
+        ->select('users.*')
+        ->where('users.school_id', $this->app['school']->id)
+        ->whereNull('users.deleted_at')
+        ->where('users.id', $id)
+        ->first();
+
+        if (!$teacher) {
+            abort(404);
+        }
+
+        $teacher->thumbnail_path = getThumbnailUrl($teacher->photo_id);
+
+        if ($request->wantsJson()) {
+            $permissionIds = DB::table('users_permissions')
+            ->where('user_id', $id)
+            ->where('school_id', $this->app['school']->id)
+            ->pluck('permission_id');
+
+            return response()->json([
+                'id' => $teacher->id,
+                'name' => $teacher->name,
+                'phone' => $teacher->phone,
+                'address' => $teacher->address,
+                'birthday' => $teacher->birthday ? \Illuminate\Support\Carbon::parse($teacher->birthday)->format('Y-m-d') : null,
+                'campus_id' => $teacher->campus_id,
+                'email' => $teacher->email,
+                'school_email_alias' => $teacher->school_email ? Str::before($teacher->school_email, '@') : null,
+                'about' => $teacher->about,
+                'photo_id' => $teacher->photo_id,
+                'photo_path' => $teacher->thumbnail_path,
+                'permission_ids' => $permissionIds,
+            ]);
+        }
+
         $rows = DB::table('permission_groups as g')
             ->leftJoin('permissions as p', function ($join) {
                 $join->on('p.permission_group_id', '=', 'g.id')
@@ -92,18 +137,8 @@ class TeachersController extends BaseController
                 'permissions' => $items->filter(fn($i) => $i->permission_id)->values(),
             ];
         });
-       
+
         $data['permission_groups']=$permission_groups;
-
-
-        $teacher = DB::table('users')
-        ->select('users.*')
-        ->where('users.school_id', $this->app['school']->id)
-        ->whereNull('users.deleted_at')
-        ->orderBy('users.created_at', 'desc')
-        ->where('users.id', $id)
-        ->first();
-        if ($teacher) $teacher->thumbnail_path = getThumbnailUrl($teacher->photo_id);
         $data['teacher']=$teacher;
 
         $campuses = DB::table('campuses')
@@ -220,7 +255,7 @@ class TeachersController extends BaseController
         return redirect()->route('teachers.show', $id)
                      ->with('success', 'Post created!');
     }
-    public function create()
+    private function getPermissionGroupsForCreate()
     {
         $rows = DB::table('permission_groups as g')
             ->leftJoin('permissions as p', function ($join) {
@@ -234,7 +269,7 @@ class TeachersController extends BaseController
             ->orderBy('g.name')
             ->get();
 
-        $permission_groups = $rows->groupBy('id')->map(function ($items) {
+        return $rows->groupBy('id')->map(function ($items) {
             $group = $items->first();
 
             return [
@@ -243,10 +278,13 @@ class TeachersController extends BaseController
                 'description' => $group->description,
                 'permissions' => $items->filter(fn($i) => $i->permission_id)->values(),
             ];
-        });
+        })->values();
+    }
 
-        $data['permission_groups']=$permission_groups;
-        $data['password']=Str::random(8);;
+    public function create()
+    {
+        $data['permission_groups'] = $this->getPermissionGroupsForCreate();
+        $data['password']=Str::random(8);
 
         $campuses = DB::table('campuses')
         ->where('school_id', $this->app['school']->id)
@@ -256,7 +294,7 @@ class TeachersController extends BaseController
         $data['campuses']=$campuses;
 
         return view('admin.teachers.create',$data);
-    } 
+    }
     public function store(Request $request){
         $school_email = $request->get('school_email_alias')
             ? $request->get('school_email_alias') . '@' . $this->app['school']->domain
