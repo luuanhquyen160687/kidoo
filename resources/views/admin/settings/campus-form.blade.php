@@ -24,4 +24,6 @@
   <div class="invalid-feedback"></div>
 </div>
 <input type="hidden" name="redirect_url"  value="/admin/options">
+@unless($hideSubmit ?? false)
 <button class="btn btn-primary w-100" type="submit">{{ $submitLabel }}</button>
+@endunless

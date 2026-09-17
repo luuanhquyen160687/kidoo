@@ -135,7 +135,7 @@
                                 <td>{{ $campus->address ?: '-' }}</td>
                                 <td>{{ $campus->phone ?: '-' }}</td>
                                 <td class="text-end">
-                                  <button class="btn btn-link text-body p-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#campus_edit_{{ $campus->id }}" aria-label="Chỉnh sửa {{ $campus->name }}">
+                                  <button class="btn btn-link text-body p-0" type="button" data-bs-toggle="modal" data-bs-target="#campus_edit_{{ $campus->id }}" aria-label="Chỉnh sửa {{ $campus->name }}">
                                     <span class="fas fa-edit"></span>
                                   </button>
                                 </td>
@@ -163,17 +163,25 @@
               </div>
 
               @foreach($campuses as $campus)
-                <div class="offcanvas offcanvas-end" id="campus_edit_{{ $campus->id }}" tabindex="-1" aria-labelledby="campus_edit_label_{{ $campus->id }}">
-                  <div class="offcanvas-header">
-                    <h5 id="campus_edit_label_{{ $campus->id }}">Cập nhật cơ sở</h5>
-                    <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                  </div>
-                  <div class="offcanvas-body">
-                    <form class="ajax_form" action="{{ route('settings.campuses.update', $campus->id) }}" method="POST">
-                      @csrf
-                      @method('PUT')
-                      @include('admin.settings.campus-form', ['campus' => $campus, 'submitLabel' => 'Cập nhật'])
-                    </form>
+                <div class="modal fade" id="campus_edit_{{ $campus->id }}" tabindex="-1" aria-labelledby="campus_edit_label_{{ $campus->id }}" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <form class="ajax_form" action="{{ route('settings.campuses.update', $campus->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="campus_edit_label_{{ $campus->id }}">Cập nhật cơ sở</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          @include('admin.settings.campus-form', ['campus' => $campus, 'submitLabel' => 'Cập nhật', 'hideSubmit' => true])
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                          <button type="submit" class="btn btn-primary">Cập nhật</button>
+                        </div>
+                      </form>
+                    </div>
                   </div>
                 </div>
               @endforeach
@@ -202,33 +210,7 @@
 
 
 
-              <div class="col-sm-12 col-md-12"> 
-                <div class="form-floating">
-                    
-                  
-                        <div class="card mt-5">
-                          
-                          <div class="card-body pt-0">
-                            <div class="myfiles-action-bar mx-n4 mb-4">
-                              <h6 class="mb-0 text-body-tertiary" id="file-manager-replace-element">Bản đồ</h6>
-                              <a id="file_browser" class="btn btn-phoenix-secondary" data-bs-toggle="offcanvas" data-bs-target="#map_canvas" aria-controls="offcanvasRight">
-                                
-                                <span class="uil-setting"></span> Thay đổi 
-                              </a>
-                              
-                             
-                            </div>
-                            <div class="row gx-xxl-9" id="bulk-select-body">
-                              
-                         {!! $school->map_embed !!}
-                            </div>
-                          </div>
-                        </div>
-
-
-                </div>
-              </div>
-
+             
 
 
 

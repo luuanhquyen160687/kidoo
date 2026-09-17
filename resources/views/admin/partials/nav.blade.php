@@ -29,10 +29,7 @@
                     <div class="dropdown-item-wrapper"><span class="me-2 uil-bell-school"></span>Giáo viên</div>
                   </a>
                 </li>
-                <li><a class="dropdown-item" href="/admin/attendance">
-                    <div class="dropdown-item-wrapper"><span class="me-2 uil-calendar-alt"></span>Điểm danh</div>
-                  </a>
-                </li>
+              
                 <li><a class="dropdown-item" href="/admin/students">
                     <div class="dropdown-item-wrapper"><span class="me-2 uil-chat-bubble-user"></span>Học sinh</div>
                   </a>
