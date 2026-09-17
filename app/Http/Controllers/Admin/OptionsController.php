@@ -13,6 +13,20 @@ class OptionsController extends BaseController
     public function index()    
     {  
 
+     $school = DB::table('schools') 
+        ->join('themes','themes.id','schools.theme_id')
+        ->where('schools.id', $this->app['school']->id)
+        ->select("schools.*","themes.name as theme_name")
+        ->first();     
+        $data['school']=$school; 
+        $themes = DB::table(table: 'themes')
+        ->get();      
+        $data['themes']=$themes; 
+        $data['campuses'] = DB::table('campuses')
+        ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
+        ->orderBy('name')
+        ->get();
         $options = DB::table('options')
         ->where('options.school_id',$this->app['school']->id)
         ->get();
