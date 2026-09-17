@@ -21,7 +21,7 @@
     @endif
 
 
-    <div class="card col-xl-8" > 
+    <div class="card col-xl-12" > 
         
        <div class="card-body" id="products" data-list='{"valueNames":["customer","email","father","mother","total-orders","total-spent","city","last-seen","last-order","class_filter"],"page":10,"pagination":true,"filter":{"key":"class_filter"}}'>
             <div class="mb-4">
@@ -161,11 +161,7 @@
     </div>
                     
 
-    <div class="col-md-4 col-xl-4 col-xxl-4 gy-5 gy-md-3">  
-                <div class="">
-                  Not defined yet content
-                </div>   
-    </div>
+    
 </div>
 </div>
 

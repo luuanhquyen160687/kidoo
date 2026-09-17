@@ -13,7 +13,7 @@
     </div>
 
 
-    <div class="card col-xl-8" > 
+    <div class="card col-xl-12" > 
         
        <div class="card-body" id="products" data-list='{"valueNames":["customer","email","total-orders","total-spent","city","last-seen","last-order"],"page":10,"pagination":true}'>
             <div class="mb-4">
@@ -115,11 +115,7 @@
     </div>
                     
 
-    <div class="col-md-4 col-xl-4 col-xxl-4 gy-5 gy-md-3">  
-                <div class="">
-                  Not defined yet content
-                </div>   
-    </div>
+    
 </div>
 
 @endsection

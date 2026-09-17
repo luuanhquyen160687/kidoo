@@ -199,7 +199,7 @@
                               </div>
                               
                             </div>
-                            <input type="text" id="photo_id" class="media-browser-input"  name="photo_id"  value="<?php echo $level->photo_id; ?>">
+                            <input type="text" style="display:none" id="photo_id" class="media-browser-input"  name="photo_id"  value="<?php echo $level->photo_id; ?>">
                             <input type="hidden" name="redirect_url"  value="/admin/programs">
                             <div class="invalid-feedback"></div> 
                           </div>

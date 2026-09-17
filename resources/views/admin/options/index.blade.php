@@ -111,7 +111,7 @@
                   <div class="card-body pt-0">
                     <div class="myfiles-action-bar mx-n4 mb-4 d-flex align-items-center justify-content-between">
                       <h6 class="mb-0 text-body-tertiary">Cơ sở</h6>
-                      <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#campus_create_canvas">
+                      <button class="btn btn-phoenix-secondary" type="button" data-bs-toggle="modal" data-bs-target="#campus_create_modal">
                         <span class="fas fa-plus me-1"></span>Thêm cơ sở
                       </button>
                     </div>
@@ -149,16 +149,24 @@
                 </div>
               </div>
 
-              <div class="offcanvas offcanvas-end" id="campus_create_canvas" tabindex="-1" aria-labelledby="campus_create_label">
-                <div class="offcanvas-header">
-                  <h5 id="campus_create_label">Thêm cơ sở</h5>
-                  <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-                </div>
-                <div class="offcanvas-body">
-                  <form class="ajax_form" action="{{ route('settings.campuses.store') }}" method="POST">
-                    @csrf
-                    @include('admin.settings.campus-form', ['campus' => null, 'submitLabel' => 'Tạo cơ sở'])
-                  </form>
+              <div class="modal fade" id="campus_create_modal" tabindex="-1" aria-labelledby="campus_create_label" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <form class="ajax_form" action="{{ route('settings.campuses.store') }}" method="POST">
+                      @csrf
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="campus_create_label">Thêm cơ sở</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        @include('admin.settings.campus-form', ['campus' => null, 'submitLabel' => 'Tạo cơ sở', 'hideSubmit' => true])
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Tạo cơ sở</button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
               </div>
 

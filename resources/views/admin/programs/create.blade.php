@@ -194,7 +194,7 @@
                               </div>
                               
                             </div>
-                            <input type="text" id="photo_id" class="media-browser-input"  name="photo_id"  value="">
+                            <input style="display:none" type="text" id="photo_id" class="media-browser-input"  name="photo_id"  value="">
                             <input type="hidden" name="redirect_url"  value="/admin/programs">
                             <div class="invalid-feedback"></div> 
                           </div>
