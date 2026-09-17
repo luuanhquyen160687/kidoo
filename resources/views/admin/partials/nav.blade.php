@@ -83,7 +83,7 @@
                     <div class="dropdown-item-wrapper"><span class="me-2 uil-sitemap" ></span>Điều hướng</div>
                   </a>
                 </li>
-                <li><a class="dropdown-item" href="/admin/settings"> 
+                <li><a class="dropdown-item" href="/admin/options"> 
                     <div class="dropdown-item-wrapper"><span class="me-2 uil-setting" ></span>Nhà trường</div>
                   </a>
                 </li>

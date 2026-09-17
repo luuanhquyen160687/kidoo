@@ -202,7 +202,7 @@
           </div>
 
           <div class="form-floating form-floating-advance-select">
-            <select name="routing_id" class="form-select" id="navigation_create_routing_id" data-choices="data-choices" data-options='{"removeItemButton":true,"placeholder":true}'>
+            <select name="routing_id" class="form-select" id="navigation_create_routing_id">
               <option value=''>Chọn nội dung</option>
               <?php foreach ($routings as $routing) { ?>
               <option value="<?php echo $routing->id;?>"><?php echo ($routing->entity=='pages' ? '[Trang] ' : '[Bài viết] ').($routing->title ?: $routing->slug);?></option>
@@ -380,7 +380,22 @@ function navigation_show_field_errors($form, errors) {
     });
 }
 
+// Bootstrap modals stay `display:none` until shown, so a select-enhancer
+// initialized before that (e.g. via the auto data-choices scan on page load)
+// can't measure the element and ends up rendering an empty dropdown. Building
+// (and rebuilding) the Choices instance on shown.bs.modal avoids that.
+function navigation_routing_choices(selector) {
+    return new Choices(selector, {
+        itemSelectText: '',
+        allowHTML: true,
+        removeItemButton: true,
+        placeholder: true
+    });
+}
+
 // Create modal
+var navigationCreateRoutingChoices = null;
+
 $(document).on('click', '.navigation-create-trigger', function (e) {
     e.preventDefault();
     var parentId = $(this).data('parent-id') || '';
@@ -389,8 +404,16 @@ $(document).on('click', '.navigation-create-trigger', function (e) {
     $('#navigation_create_form .invalid-feedback').html('');
     $('#navigation_create_form .form-control, #navigation_create_form .form-select').removeClass('is-invalid');
     $('#navigation_create_parent_id').val(parentId);
+    $('#navigation_create_routing_id').val('');
 
     $('#navigation_create_modal').modal('show');
+});
+
+$('#navigation_create_modal').on('shown.bs.modal', function () {
+    if (navigationCreateRoutingChoices) {
+        navigationCreateRoutingChoices.destroy();
+    }
+    navigationCreateRoutingChoices = navigation_routing_choices('#navigation_create_routing_id');
 });
 
 $('#navigation_create_form').on('submit', function (e) {
@@ -415,12 +438,8 @@ $('#navigation_create_form').on('submit', function (e) {
 });
 
 // Edit modal
-var navigationEditRoutingChoices = new Choices('#navigation_edit_routing_id', {
-    itemSelectText: '',
-    allowHTML: true,
-    removeItemButton: true,
-    placeholder: true
-});
+var navigationEditRoutingChoices = null;
+var navigationEditSelectedRoutingId = '';
 
 $(document).on('click', '.navigation-edit-trigger', function (e) {
     e.preventDefault();
@@ -434,14 +453,21 @@ $(document).on('click', '.navigation-edit-trigger', function (e) {
 
         $('#navigation_edit_name').val(res.name);
         $('#navigation_edit_parent_id').val(res.parent_id || '');
-
-        navigationEditRoutingChoices.removeActiveItems();
-        if (res.routing_id) {
-            navigationEditRoutingChoices.setChoiceByValue(String(res.routing_id));
-        }
+        $('#navigation_edit_routing_id').val(res.routing_id || '');
+        navigationEditSelectedRoutingId = res.routing_id || '';
 
         $('#navigation_edit_modal').modal('show');
     });
+});
+
+$('#navigation_edit_modal').on('shown.bs.modal', function () {
+    if (navigationEditRoutingChoices) {
+        navigationEditRoutingChoices.destroy();
+    }
+    navigationEditRoutingChoices = navigation_routing_choices('#navigation_edit_routing_id');
+    if (navigationEditSelectedRoutingId) {
+        navigationEditRoutingChoices.setChoiceByValue(String(navigationEditSelectedRoutingId));
+    }
 });
 
 $('#navigation_edit_form').on('submit', function (e) {

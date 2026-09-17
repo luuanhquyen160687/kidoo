@@ -23,5 +23,5 @@
   <textarea class="form-control" id="campus_map_{{ $campus->id ?? 'new' }}" name="google_map" rows="4">{{ old('google_map', $campus->google_map ?? '') }}</textarea>
   <div class="invalid-feedback"></div>
 </div>
-<input type="hidden" name="redirect_url"  value="/admin/settings">
+<input type="hidden" name="redirect_url"  value="/admin/options">
 <button class="btn btn-primary w-100" type="submit">{{ $submitLabel }}</button>

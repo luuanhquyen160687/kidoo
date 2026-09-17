@@ -81,7 +81,7 @@
                     <button class="btn-close text-reset" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                   </div>
                 <div class="offcanvas-body">
-                   <form class="ajax_form" action="/admin/settings/{{$school->id}}" class="mb-9" method="PUT" >
+                   <form class="ajax_form school_options" action="/admin/settings/{{$school->id}}" class="mb-9" method="PUT" >
                                 @csrf
                                 @method('PUT')
                                 <label>Thông tin nhà trường:</label>
