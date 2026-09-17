@@ -9,8 +9,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 class ClassesController extends BaseController
 {
-    public function index()    
-    { 
+    public function index()
+    {
          $classes = DB::table('classes')
         ->leftJoin('programs','programs.id','classes.program_id')
         ->leftJoin('campuses','campuses.id','classes.campus_id')
@@ -21,6 +21,26 @@ class ClassesController extends BaseController
         ->get();
         $classes->each(fn($class) => $class->thumbnail_path = getThumbnailUrl($class->photo_id));
         $data['classes']=$classes;
+
+        $programs = DB::table('programs')
+        ->select('programs.*')
+        ->where('programs.school_id', $this->app['school']->id)
+        ->whereNull('programs.deleted_at')
+        ->get();
+        $programs->each(fn($program) => $program->thumbnail_path = getThumbnailUrl($program->photo_id));
+        $data['programs']=$programs;
+
+        $data['teachers'] = DB::table('users')
+        ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
+        ->get();
+
+        $data['campuses'] = DB::table('campuses')
+        ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
+        ->orderBy('name')
+        ->get();
+
         return view('admin.classes.index',$data);
     }
     public function albums($id)
@@ -553,13 +573,38 @@ class ClassesController extends BaseController
         ]);
     }
 
-    public function edit($id){
+    public function edit($id, Request $request){
         $class = DB::table('classes')
         ->select('classes.*')
         ->where('classes.school_id', $this->app['school']->id)
         ->where('classes.id', $id)
         ->first();
-        if ($class) $class->thumbnail_path = getThumbnailUrl($class->photo_id);
+
+        if (!$class) {
+            abort(404);
+        }
+
+        $class->thumbnail_path = getThumbnailUrl($class->photo_id);
+
+        $assistantTeacherIds = DB::table('class_teacher')
+        ->where('class_id', $id)
+        ->where('role', 'assistant')
+        ->pluck('teacher_id');
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'id' => $class->id,
+                'name' => $class->name,
+                'program_id' => $class->program_id,
+                'campus_id' => $class->campus_id,
+                'year' => $class->year,
+                'tuition' => $class->tuition,
+                'teacher_id' => $class->teacher_id,
+                'photo_id' => $class->photo_id,
+                'photo_path' => $class->thumbnail_path,
+                'assistant_teacher_ids' => $assistantTeacherIds,
+            ]);
+        }
 
         $data['class']=$class;
 
@@ -576,10 +621,7 @@ class ClassesController extends BaseController
         ->get();
         $data['teachers']=$teachers;
 
-        $data['assistantTeacherIds'] = DB::table('class_teacher')
-        ->where('class_id', $id)
-        ->where('role', 'assistant')
-        ->pluck('teacher_id');
+        $data['assistantTeacherIds'] = $assistantTeacherIds;
 
         $campuses = DB::table('campuses')
         ->where('school_id', $this->app['school']->id)
@@ -592,6 +634,25 @@ class ClassesController extends BaseController
     }
     public function update($id,Request $request){
 
+        $validator = Validator::make($request->all(), [
+        'name' => 'required|min:5',
+        'photo_id' => 'required', // example
+        'program_id' => 'required',
+        'campus_id' => 'nullable|exists:campuses,id',
+        'year' => ['required','integer','min:' . (now()->year - 5),'max:' . (now()->year + 5)],
+        'tuition' => 'required|numeric|min:0',
+        'teacher_id' => ['required', Rule::exists('users', 'id')->whereNull('deleted_at')],
+        'assistant_teacher_ids' => 'nullable|array',
+        'assistant_teacher_ids.*' => ['integer', Rule::exists('users', 'id')->whereNull('deleted_at')],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
         DB::table('classes')
         ->where('id', $id)
         ->update([
@@ -602,7 +663,6 @@ class ClassesController extends BaseController
         'teacher_id' => $request->get('teacher_id'),
         'year' => $request->get('year'),
         'tuition' => $request->get('tuition'),
-        'created_at' => now(),
         'updated_at' => now(),
         ]);
 
@@ -644,7 +704,7 @@ class ClassesController extends BaseController
         'photo_id' => 'required', // example
         'program_id' => 'required',
         'campus_id' => 'nullable|exists:campuses,id',
-        'year' => 'required','integer','min:' . (now()->year - 5),'max:' . (now()->year + 5),
+        'year' => ['required','integer','min:' . (now()->year - 5),'max:' . (now()->year + 5)],
         'tuition' => 'required|numeric|min:0',
         'teacher_id' => ['required', Rule::exists('users', 'id')->whereNull('deleted_at')],
         'assistant_teacher_ids' => 'nullable|array',
