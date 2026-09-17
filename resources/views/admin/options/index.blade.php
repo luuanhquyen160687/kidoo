@@ -16,23 +16,27 @@
                           <div class="card-body pt-0 school_options">
                             <div class="myfiles-action-bar mx-n4 mb-4">
                               <h6 class="mb-0 text-body-tertiary" id="file-manager-replace-element">Thông tin nhà trường</h6>
-                              <button class="btn btn-phoenix-secondary school_options_update"  >
-                                
-                                <span class="uil-setting"></span> Thay đổi 
+                              <button class="btn btn-phoenix-secondary school_options_update" type="button" data-bs-toggle="modal" data-bs-target="#school_options_modal">
+
+                                <span class="uil-setting"></span> Thay đổi
                               </button>
-                              
-                              <script type="text/javascript">
-                                
-                              </script>
                             </div>
                             <div class="row gx-xxl-9" id="bulk-select-body">
 
                              @forelse($options_list as $item)
                              @php $option = $options->firstWhere('key', $item['key']); @endphp
                              <div class="row ">
-                              <div class="col-3"><h6 class="mb-0 fw-semibold fs-9 text-body-tertiary">{{ $option->name ?? $item['key'] }}</h6></div>
+                              <div class="col-3"><h6 class="mb-0 fw-semibold fs-9 text-body-tertiary">{{ $item['name'] }}</h6></div>
                               <div class="col-auto"><h6 class="mb-0 fw-semibold fs-9 text-body-tertiary">:</h6></div>
-                              <div class="col-auto"><h6 class="mb-0 fw-semibold fs-9 text-body-tertiary">{{ $option->data ?? '' }}</h6></div>
+                              <div class="col-auto">
+                                @if($item['type'] === 'photo')
+                                  @if($option->data ?? null)
+                                    <img src="{{ getPhotoUrl($option->data) }}" alt="{{ $item['name'] }}" style="max-height: 60px; max-width: 120px; object-fit: contain;">
+                                  @endif
+                                @else
+                                  <h6 class="mb-0 fw-semibold fs-9 text-body-tertiary">{{ $option->data ?? '' }}</h6>
+                                @endif
+                              </div>
                              </div>
                              <hr class="my-2">
                              @empty
@@ -47,7 +51,49 @@
                 </div>
               </div>
 
-             
+              <div class="modal fade" id="school_options_modal" tabindex="-1" aria-labelledby="school_options_modal_label" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <form class="ajax_form" action="{{ route('options.store') }}" method="POST">
+                      @csrf
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="school_options_modal_label">Cập nhật thông tin nhà trường</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        @foreach($options_list as $item)
+                        @php $option = $options->firstWhere('key', $item['key']); @endphp
+                        <div class="mb-3">
+                          @if($item['type'] === 'photo')
+                            <label class="form-label">{{ $item['name'] }}</label>
+                            @include('admin.components.file_picker', [
+                                'id' => 'option_' . $item['key'] . '_picker',
+                                'name' => $item['key'],
+                                'label' => 'Chọn ' . $item['name'],
+                                'multiple' => false,
+                                'reopenModal' => 'school_options_modal',
+                                'initial' => ($option->data ?? null) ? [['id' => $option->data, 'path' => getPhotoUrl($option->data)]] : [],
+                            ])
+                            <div class="invalid-feedback"></div>
+                          @else
+                            <div class="form-floating">
+                              <input class="form-control" value="{{ $option->data ?? '' }}" name="{{ $item['key'] }}" id="{{ $item['key'] }}_input" type="{{ $item['type'] }}" placeholder="{{ $item['name'] }}">
+                              <label for="{{ $item['key'] }}_input">{{ $item['name'] }}</label>
+                              <div class="invalid-feedback"></div>
+                            </div>
+                          @endif
+                        </div>
+                        @endforeach
+                        <input type="hidden" name="redirect_url" value="/admin/options">
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        <button type="submit" class="btn btn-primary">Cập nhật</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
 
               <div class="col-sm-12 col-md-12">
                 <div class="card mt-5">

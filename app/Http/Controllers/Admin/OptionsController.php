@@ -10,17 +10,24 @@ use Illuminate\Validation\Rule;
 
 class OptionsController extends BaseController
 {
-    public function index()    
-    {  
-        $options_list[]=array("key"=>"school_name","type"=>"text","name"=>"Tên trường");
-        $options_list[]=array("key"=>"school_slogan","type"=>"text","name"=>"Khẩu hiệu nhà trường");
-        $options_list[]=array("key"=>"school_address","type"=>"text","name"=>"Địa chỉ");
-        $options_list[]=array("key"=>"school_principal","type"=>"text","name"=>"Hiệu trưởng");
-        $options_list[]=array("key"=>"school_phone","type"=>"text","name"=>"Điện thoại");
-        $options_list[]=array("key"=>"school_email","type"=>"text","name"=>"Email");
-       
+    protected function optionsList(): array
+    {
+        return [
+            ['key' => 'school_name', 'type' => 'text', 'name' => 'Tên trường'],
+            ['key' => 'school_slogan', 'type' => 'text', 'name' => 'Khẩu hiệu nhà trường'],
+            ['key' => 'logo', 'type' => 'photo', 'name' => 'Logo'],
+            ['key' => 'school_address', 'type' => 'text', 'name' => 'Địa chỉ'],
+            ['key' => 'school_principal', 'type' => 'text', 'name' => 'Hiệu trưởng'],
+            ['key' => 'school_phone', 'type' => 'text', 'name' => 'Điện thoại'],
+            ['key' => 'school_email', 'type' => 'text', 'name' => 'Email'],
+        ];
+    }
 
-     $school = DB::table('schools') 
+    public function index()
+    {
+        $options_list = $this->optionsList();
+
+     $school = DB::table('schools')
         ->join('themes','themes.id','schools.theme_id')
         ->where('schools.id', $this->app['school']->id)
         ->select("schools.*","themes.name as theme_name")
@@ -54,16 +61,36 @@ $data=[];
         return view('admin.options.create',$data);
     } 
     public function store(Request $request){
-        $options = DB::table('options')->get();
+        $school_id = $this->app['school']->id;
 
-        foreach ($options as $option) {
-            if ($request->has($option->key)) {
+        foreach ($this->optionsList() as $item) {
+            if (! $request->has($item['key'])) {
+                continue;
+            }
+
+            $existing = DB::table('options')
+                ->where('school_id', $school_id)
+                ->where('key', $item['key'])
+                ->first();
+
+            if ($existing) {
                 DB::table('options')
-                    ->where('id', $option->id)
+                    ->where('id', $existing->id)
                     ->update([
-                        'data' => $request->input($option->key),
+                        'name' => $item['name'],
+                        'data' => $request->input($item['key']),
                         'updated_at' => now(),
                     ]);
+            } else {
+                DB::table('options')->insert([
+                    'school_id' => $school_id,
+                    'key' => $item['key'],
+                    'name' => $item['name'],
+                    'data' => $request->input($item['key']),
+                    'type' => $item['type'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
             }
         }
 

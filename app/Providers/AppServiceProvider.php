@@ -73,9 +73,18 @@ class AppServiceProvider extends ServiceProvider
         });
 
         
+        $options = DB::table('options')
+        ->where('school_id', $school->id)
+        ->get()
+        ->keyBy('key');
+
+        $logo = $options->get('logo')->data ?? null;
+
         $data['school']=$school;
         $data['navigations']=$navigations;
-        View::share('app', $data);       
+        $data['options'] = $options;
+        $data['logo_url'] = $logo ? getPhotoUrl($logo) : '/assets/admin/img/icons/logo.png';
+        View::share('app', $data);
 
 
 
