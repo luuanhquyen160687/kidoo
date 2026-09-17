@@ -7,7 +7,6 @@
               <h2 class="mb-2">Lớp học</h2>
             </div>
             <div class="col-auto">
-              <button class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0" type="button">Import</button>
               <a href="/admin/classes/create" class="btn btn-primary mb-2 mb-sm-0" type="submit">Thêm lớp học</a>
             </div>
     </div>
