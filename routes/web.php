@@ -37,7 +37,7 @@ Route::middleware([
     \App\Http\Middleware\CheckLogin::class,   
 ])->group(function () {
     Route::get('/admin', [AdminController::class, 'index']);  
-    Route::resource('/admin/programs', ProgramsController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
+    Route::resource('/admin/programs', ProgramsController::class)->only(['index', 'show', 'store', 'destroy','edit','update']);
     Route::resource('/admin/classes', ClassesController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
     Route::get('/admin/classes/{class}/albums', [ClassesController::class, 'albums'])->whereNumber('class')->name('classes.albums');
     Route::get('/admin/classes/{class}/albums/{post}', [ClassesController::class, 'albumShow'])->whereNumber(['class', 'post'])->name('classes.albums.show');

@@ -8,14 +8,14 @@ use Illuminate\Support\Str;
 
 class programsController extends BaseController
 {
-    public function index()    
-    { 
+    public function index()
+    {
         $programs = DB::table('programs')
         ->select('*')
         ->where('programs.school_id', $this->app['school']->id)
         ->whereNull('programs.deleted_at')
         ->orderBy('programs.created_at', 'desc')
-        ->get(); 
+        ->get();
         foreach ($programs as $index=>$program)
             {
                  $files = DB::table('files')
@@ -23,13 +23,19 @@ class programsController extends BaseController
                 ->where('program_files.program_id',$program->id)
                 ->select('*')
                 ->get();
-                $programs[$index]->files = $files; 
+                $programs[$index]->files = $files;
             }
 
-       
-        $data['programs']=$programs; 
-        return view('admin.programs.index',$data); 
-    }  
+
+        $data['programs']=$programs;
+
+        $teachers = DB::table('users')
+        ->where('school_id', $this->app['school']->id)
+        ->get();
+        $data['teachers']=$teachers;
+
+        return view('admin.programs.index',$data);
+    }
     public function show($id)
     {
          $level = DB::table('programs')
@@ -53,24 +59,31 @@ class programsController extends BaseController
         ->where('programs.school_id', $this->app['school']->id)
         ->whereNull('programs.deleted_at')
         ->where('programs.id', $id)
-        ->orderBy('programs.created_at', 'desc')
-        ->first(); 
+        ->first();
 
-         $files = DB::table('files')
-                ->leftJoin('program_files','files.id','program_files.file_id')
-                ->where('program_files.program_id',$level->id)
-                ->select('files.*')
-                ->get();
-        $level->files = $files; 
-       
-        $data['level']=$level; 
+        if (!$level) {
+            abort(404);
+        }
 
-        $teachers = DB::table('users')
-        ->where('school_id', $this->app['school']->id)
+        $files = DB::table('files')
+        ->join('program_files','files.id','program_files.file_id')
+        ->where('program_files.program_id',$level->id)
+        ->select('files.id','files.path')
         ->get();
-        $data['teachers']=$teachers; 
-        
-        return view('admin.programs.edit',$data);
+
+        return response()->json([
+            'id' => $level->id,
+            'name' => $level->name,
+            'tuition' => $level->tuition,
+            'class_count' => $level->class_count,
+            'age_from' => $level->age_from,
+            'age_to' => $level->age_to,
+            'manager_id' => $level->manager_id,
+            'introduction' => $level->introduction,
+            'photo_id' => $level->photo_id,
+            'photo_path' => $level->photo_id ? getPhotoUrl($level->photo_id) : null,
+            'files' => $files,
+        ]);
     }
     public function update($id,Request $request){
 
@@ -105,33 +118,24 @@ class programsController extends BaseController
             'manager_id' => $request->get('manager_id'),
             'updated_at' => now(),
         ]);
-        if($request->get('files'))
-        {
-            foreach($request->get('files') as $file){
-                if($file)
-                {
-                    DB::table('program_files')->insertOrIgnore([
-                        'program_id' => $id,
-                        'file_id' => $file,
-                        'school_id'=>$this->app['school']->id,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-            };
+
+        $fileIds = array_filter($request->get('files', []));
+
+        DB::table('program_files')
+        ->where('program_id', $id)
+        ->whereNotIn('file_id', $fileIds)
+        ->delete();
+
+        foreach ($fileIds as $fileId) {
+            DB::table('program_files')->insertOrIgnore([
+                'program_id' => $id,
+                'file_id' => $fileId,
+                'school_id' => $this->app['school']->id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
-        if($request->get('deleted_files'))
-        {
-            foreach($request->get('deleted_files') as $file){
-                if($file)
-                {
-                    DB::table('program_files')
-                    ->where('file_id', $file)
-                    ->where('program_id', $id)
-                    ->delete();
-                }
-            };
-        } 
+
         DB::table('programs')
         ->where('id', $id)
         ->update(['slug' => Str::slug($request->get('name'))]);
@@ -140,14 +144,6 @@ class programsController extends BaseController
         return redirect()->route('programs.show', $id)
                      ->with('success', 'Post created!');
     }
-    public function create()
-    {
-        $teachers = DB::table('users')
-        ->where('school_id', $this->app['school']->id)
-        ->get();
-        $data['teachers']=$teachers; 
-        return view('admin.programs.create', $data);
-    } 
     public function store(Request $request){
 
        

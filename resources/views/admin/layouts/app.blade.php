@@ -321,6 +321,7 @@ ButtonFormBlot.tagName = 'div';
 
 Quill.register(ButtonFormBlot);
 const quills = {};
+window.quills = quills;
 
 $('.quill_editor').each(function () {
     const input_id = $(this).attr('for');
