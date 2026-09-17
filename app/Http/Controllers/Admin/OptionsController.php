@@ -12,6 +12,13 @@ class OptionsController extends BaseController
 {
     public function index()    
     {  
+        $options_list[]=array("key"=>"school_name","type"=>"text","name"=>"Tên trường");
+        $options_list[]=array("key"=>"school_slogan","type"=>"text","name"=>"Khẩu hiệu nhà trường");
+        $options_list[]=array("key"=>"school_address","type"=>"text","name"=>"Địa chỉ");
+        $options_list[]=array("key"=>"school_principal","type"=>"text","name"=>"Hiệu trưởng");
+        $options_list[]=array("key"=>"school_phone","type"=>"text","name"=>"Điện thoại");
+        $options_list[]=array("key"=>"school_email","type"=>"text","name"=>"Email");
+       
 
      $school = DB::table('schools') 
         ->join('themes','themes.id','schools.theme_id')
@@ -31,6 +38,8 @@ class OptionsController extends BaseController
         ->where('options.school_id',$this->app['school']->id)
         ->get();
         $data['options']= $options;
+
+         $data['options_list']= $options_list;
 
         return view('admin.options.index',$data); 
     }  
