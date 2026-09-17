@@ -20,6 +20,9 @@ class OptionsController extends BaseController
             ['key' => 'school_principal', 'type' => 'text', 'name' => 'Hiệu trưởng'],
             ['key' => 'school_phone', 'type' => 'text', 'name' => 'Điện thoại'],
             ['key' => 'school_email', 'type' => 'text', 'name' => 'Email'],
+            ['key' => 'facebook_url', 'type' => 'url', 'name' => 'Facebook'],
+            ['key' => 'youtube_url', 'type' => 'url', 'name' => 'Youtube'],
+            ['key' => 'zalo_url', 'type' => 'url', 'name' => 'Zalo'],
         ];
     }
 

@@ -33,6 +33,17 @@
                                   @if($option->data ?? null)
                                     <img src="{{ getPhotoUrl($option->data) }}" alt="{{ $item['name'] }}" style="max-height: 60px; max-width: 120px; object-fit: contain;">
                                   @endif
+                                @elseif($item['type'] === 'url')
+                                  @if($option->data ?? null)
+                                    <a href="{{ $option->data }}" target="_blank" rel="noopener noreferrer" class="fw-semibold fs-9">
+                                      @if(str_contains($item['key'], 'facebook'))
+                                        <span class="fab fa-facebook text-primary me-1"></span>
+                                      @elseif(str_contains($item['key'], 'youtube'))
+                                        <span class="fab fa-youtube text-danger me-1"></span>
+                                      @endif
+                                      {{ $item['name'] }}
+                                    </a>
+                                  @endif
                                 @else
                                   <h6 class="mb-0 fw-semibold fs-9 text-body-tertiary">{{ $option->data ?? '' }}</h6>
                                 @endif
