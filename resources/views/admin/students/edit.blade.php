@@ -201,24 +201,15 @@
                       <div class="row gx-3">
                         <div class="col-12 col-sm-6 col-xl-12">
                          <div class="mb-4">
-                            <h5 class="mb-3">Ảnh đại diện bài viết</h5> 
-                            <div id="feature_file" class="d-flex align-items-end position-relative">
-                                <input class="d-none"  id="feature_file_browser" type="file" />
-                                
-                                    <div class="hoverbox" style="width: 100%;">
-                                    <div class="hoverbox-content rounded-square d-flex flex-center z-1" style="--phoenix-bg-opacity: .56;"><span class="fa-solid fa-camera fs-1 text-body-quaternary"></span></div>
-                                    <div class="position-relative bg-body-quaternary rounded-square cursor-pointer d-flex flex-center ">
-                                      <div class="avatar avatar-5xl">
-                                        <img preview-input-id="photo_id" class="rounded-square" src="<?php echo $student->photo_id? getPhotoUrl($student->photo_id) :'/assets/admin/trans.png'; ?>" alt="" /></div>
-                                      <label class="w-100 h-100 position-absolute z-1" for="photo_id">
-                                      </label>
-                                    </div>
-                                    
-                              </div>
-                              
-                            </div>
-                            <input  style="display:none;" type="text" id="photo_id" class="media-browser-input"  name="photo_id"  value="<?php echo $student->photo_id;?>">
-                            <div class="invalid-feedback"></div> 
+                            <h5 class="mb-3">Ảnh đại diện</h5>
+                            @include('admin.components.file_picker', [
+                                'id' => 'student_photo_picker',
+                                'name' => 'photo_id',
+                                'label' => 'Chọn ảnh đại diện',
+                                'multiple' => false,
+                                'initial' => $student->photo_id ? [['id' => $student->photo_id, 'path' => $student->thumbnail_path]] : [],
+                            ])
+                            <div class="invalid-feedback"></div>
                           </div>
                         </div>
                         
@@ -234,12 +225,8 @@
             </div>
           </div>
           <input type="hidden" name="redirect_url" value="/admin/students"/>
-          
+
         </form>
-
-       
-
-@include('admin.pages.media_browser')
 
 @endsection
 
@@ -318,27 +305,6 @@ function renderUploadFiles() {
 
     });
 }
-
-
-$('#level_select').on('change', function () {
-    var selected = $(this).find(':selected');
-
-    var photo_id = selected.data('photo_id');   // data-price
-    var thumbnail_path  = selected.data('thumbnail_path');    // data-type
-    $("#photo_file img").attr("src",thumbnail_path);
-    $("#photo_id").val(photo_id); 
-});
-
-// Upload feature image
-$('#photo_id_browser').on('change', function() {
-    var files = this.files;
-    if (files.length === 0) return;
-       uploadSingleFile(files[0], function(response) {
-            $("#photo_file img").attr("src","/get_photo/"+response.id+"/500");
-             $("#photo_id").val(response.id); 
-        });
-});
-
 
 
 function uploadSingleFile(file, callback) {
