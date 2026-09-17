@@ -178,25 +178,15 @@
                       <div class="row gx-3">
                         <div class="col-12 col-sm-6 col-xl-12">
                           <div class="mb-4">
-                            <h5 class="mb-3">Ảnh đại diện</h5> 
-                            <div id="photo_file" class="d-flex align-items-end position-relative">
-                                <input class="d-none"  id="photo_id_browser" type="file" />
-                                
-                                    <div class="hoverbox" style="width: 100%;">
-                                    <div class="hoverbox-content rounded-square d-flex flex-center z-1" style="--phoenix-bg-opacity: .56;"><span class="fa-solid fa-camera fs-1 text-body-quaternary"></span></div>
-                                    <div class="position-relative bg-body-quaternary rounded-square cursor-pointer d-flex flex-center ">
-                                      <div class="avatar avatar-5xl">
-                                        <img preview-input-id="photo_id" class="rounded-square" src="/assets/admin/trans.png" alt="" /></div>
-                                      <label class="w-100 h-100 position-absolute z-1" for="photo_id">
-                                      </label>
-                                    </div>
-                                    
-                              </div>
-                              
-                            </div>
-                            <input style="display:none" type="text" id="photo_id" class="media-browser-input"  name="photo_id"  value="">
+                            <h5 class="mb-3">Ảnh đại diện</h5>
+                            @include('admin.components.file_picker', [
+                                'id' => 'program_photo_picker',
+                                'name' => 'photo_id',
+                                'label' => 'Chọn ảnh đại diện',
+                                'multiple' => false,
+                            ])
                             <input type="hidden" name="redirect_url"  value="/admin/programs">
-                            <div class="invalid-feedback"></div> 
+                            <div class="invalid-feedback"></div>
                           </div>
                         </div>
                         
@@ -275,18 +265,6 @@ function renderUploadFiles() {
 
     });
 }
-
-// Upload feature image
-$('#photo_id_browser').on('change', function() {
-    var files = this.files;
-    if (files.length === 0) return;
-       uploadSingleFile(files[0], function(response) {
-            $("#photo_file img").attr("src","/get_photo/"+response.id+"/500");
-             $("#photo_id").val(response.id); 
-        });
-}); 
-
-
 
 function uploadSingleFile(file, callback) {
     let formData = new FormData();
