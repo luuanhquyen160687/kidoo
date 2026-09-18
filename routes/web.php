@@ -27,6 +27,8 @@ use App\Http\Controllers\Admin\MediasController;
 use App\Http\Controllers\Admin\TagsController;  
 use App\Http\Controllers\Admin\OptionsController;
 use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\BalanceController;
+use App\Http\Controllers\PaymentWebhookController;
 use App\Http\Middleware\CheckLogin;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 
@@ -98,6 +100,7 @@ Route::middleware([
     Route::post('/admin/page_blocks/sort', [PageBlocksController::class, 'sort'])->name('page_blocks.sort');    
     Route::post('/admin/page_blocks/toggle_show', [PageBlocksController::class, 'toggle_show'])->name('page_blocks.toggle_show');
     Route::resource('/admin/options', OptionsController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
+    Route::get('/admin/balance', [BalanceController::class, 'index'])->name('balance.index');
     Route::get('/admin/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/admin/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/admin/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -141,6 +144,10 @@ Route::get('/{slug}', [HomeController::class, 'show']);
 
   
 Route::post('/admin/upload', [UploadsController::class, 'upload'])->name('file_upload')->withoutMiddleware([ValidateCsrfToken::class]);;
+
+Route::post('/webhooks/payment/{gateway}', [PaymentWebhookController::class, 'handle'])
+    ->name('webhooks.payment')
+    ->withoutMiddleware([ValidateCsrfToken::class]);
 
 
 Route::middleware([

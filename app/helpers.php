@@ -94,6 +94,60 @@ if (! function_exists('teacherClassIds')) {
     }
 }
 
+if (!function_exists('recordSchoolTransaction')) {
+    /**
+     * Insert a school_transactions ledger row and keep schools.balance in
+     * sync, atomically (row-locks the school so concurrent calls can't race
+     * on balance_after). Pass idempotency_key in $options to make retries
+     * safe — a repeat call with the same key returns the original row
+     * instead of inserting a second one.
+     *
+     * $options keys: reference_type, reference_id, description, created_by,
+     * idempotency_key.
+     */
+    function recordSchoolTransaction($school_id, $type, $direction, $amount, array $options = []) {
+        if (!in_array($direction, ['credit', 'debit'])) {
+            throw new InvalidArgumentException("Invalid transaction direction: {$direction}");
+        }
+
+        return DB::transaction(function () use ($school_id, $type, $direction, $amount, $options) {
+            $school = DB::table('schools')->where('id', $school_id)->lockForUpdate()->first();
+            if (!$school) {
+                throw new RuntimeException("School {$school_id} not found.");
+            }
+
+            $idempotencyKey = $options['idempotency_key'] ?? null;
+            if ($idempotencyKey) {
+                $existing = DB::table('school_transactions')->where('idempotency_key', $idempotencyKey)->first();
+                if ($existing) {
+                    return $existing;
+                }
+            }
+
+            $amount = abs($amount);
+            $balanceAfter = $direction === 'credit' ? $school->balance + $amount : $school->balance - $amount;
+
+            $id = DB::table('school_transactions')->insertGetId([
+                'school_id' => $school_id,
+                'type' => $type,
+                'direction' => $direction,
+                'amount' => $amount,
+                'balance_after' => $balanceAfter,
+                'reference_type' => $options['reference_type'] ?? null,
+                'reference_id' => $options['reference_id'] ?? null,
+                'description' => $options['description'] ?? null,
+                'created_by' => $options['created_by'] ?? (Auth::check() ? Auth::id() : null),
+                'idempotency_key' => $idempotencyKey,
+                'created_at' => now(),
+            ]);
+
+            DB::table('schools')->where('id', $school_id)->update(['balance' => $balanceAfter]);
+
+            return DB::table('school_transactions')->where('id', $id)->first();
+        });
+    }
+}
+
 function getSlug($title,$entity,$entity_id,$school_id){
     $slug = Str::slug($title);
         $existingSlugCount = DB::table('routings')

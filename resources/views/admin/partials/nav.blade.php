@@ -90,7 +90,13 @@
                 </li>
               </ul>
             </li>
-          </ul> 
+            <li class="nav-item ">
+              <a class="nav-link  lh-1" href="/admin/balance" role="button"  aria-haspopup="true" aria-expanded="false">
+                <span class="uil fs-8 me-2 uil-wallet"></span>Số dư
+              </a>
+            </li>
+
+          </ul>
 
 
           

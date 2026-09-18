@@ -35,4 +35,26 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Gateway Webhooks
+    |--------------------------------------------------------------------------
+    |
+    | Per-gateway secret used to verify the HMAC-SHA256 signature on inbound
+    | webhook/IPN calls (see PaymentWebhookController). Add a key named after
+    | the gateway (matching the {gateway} route segment) once a real provider
+    | is integrated; 'default' is used when no gateway-specific entry exists.
+    |
+    */
+
+    'payment_webhooks' => [
+        'default' => [
+            'secret' => env('PAYMENT_WEBHOOK_SECRET'),
+            'signature_header' => 'X-SePay-Signature',
+            'signature_timestamp' => 'X-SePay-Timestamp',
+            'sepay_merchant_id'=>'sepay_merchant_id',
+            'sepay_merchant_secrete'=>'sepay_merchant_secrete'
+        ],
+    ],
+
 ];
