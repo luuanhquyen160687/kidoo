@@ -16,6 +16,7 @@
 /public/build
 /public/hot
 /public/files
+/public/thumbnails
 /public/storage
 /storage/*.key
 /storage/pail
