@@ -159,7 +159,7 @@ class TuitionsController extends BaseController
         $checkoutData = CheckoutBuilder::make()
             ->currency('VND')
             ->orderInvoiceNumber('student_tuitions-'.$tuition->id)
-            ->orderAmount(5000)
+            ->orderAmount($data['total'])
             ->operation('PURCHASE')
             ->orderDescription("Thanh toán học phí tháng {$tuition->month} năm {$tuition->year} - {$student->name}")
             ->successUrl(route('tuitions.show', [$student_id, $year, $month]))

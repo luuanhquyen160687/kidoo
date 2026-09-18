@@ -47,7 +47,7 @@ class PaymentWebhookController extends Controller
                     ]);
 
                 // add new school_transaction
-                $amount = DB::table('student_tuitions_fees')->where('tuition_id', $student_tuitions_id)->sum('amount');
+                $amount = $payload['transaction']['transaction_amount']; 
 
                 $student = DB::table('students')->where('id', $tuition->student_id)->first();
                 $class = DB::table('class_student')
