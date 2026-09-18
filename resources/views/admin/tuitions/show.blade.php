@@ -98,12 +98,23 @@ $type_labels = [
   </div>
 </div>
 @if ($tuition->status != 'paid')
+
+<div class="sepay_form" style="display:none">
+{!!$sepay!!}
+</div>
+
+
+
 <div class="card mb-4">
   <div class="card-body text-center">
-    <h5 class="mb-3">Quét mã QR để thanh toán</h5>
-    <img src="https://vietqr.app/img?bank=TPBank&acc=12316061987&template=qronly&amount=5000&des=hocphi-<?php echo $tuition->id;?>&showinfo=true&holder=LUU%20ANH%20QUYEN&store=mamnonbanmai&code=123" class="img-fluid" style="max-width: 300px;">
+    <button type="button" id="sepay_pay_button" class="btn btn-phoenix-primary me-2 mb-2 mb-sm-0">Thanh toán học phí</button>
   </div>
 </div>
+
+
+
+
+
 @endif
 @endsection
 
@@ -113,6 +124,10 @@ $('.delete_line_form').on('submit', function (e) {
     if (!confirm('Xoá khoản phí này?')) {
         e.preventDefault();
     }
+});
+
+$('#sepay_pay_button').on('click', function () {
+    $('.sepay_form form').submit();
 });
 </script>
 @endsection

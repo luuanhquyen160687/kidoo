@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PaymentWebhookController extends Controller
@@ -17,25 +18,52 @@ class PaymentWebhookController extends Controller
      */
     public function handle(Request $request, string $gateway)
     {
-        $rawPayload = $request->getContent();
-        $config = config("services.payment_webhooks.{$gateway}") ?? config('services.payment_webhooks.default');
-        $verified = $this->verifySignature($request, $rawPayload, $config);
 
+    
+        $rawPayload = $request->getContent();
+        $payload = json_decode($rawPayload,true);
+
+        // log payment
         Log::channel('payment_webhooks')->info('Payment webhook received', [
             'gateway' => $gateway,
             'ip' => $request->ip(),
-            'verified' => $verified,
-            'headers' => $request->headers->all(),
-            'payload' => $request->all() ?: $rawPayload,
+            'payload' => $payload,
         ]);
 
-        if (!$verified) {
-            abort(401, 'Invalid signature');
-        }
+        if ($payload['notification_type'] === 'ORDER_PAID') {
+            $order_invoice_number=$payload['order']['order_invoice_number'];
+            $order_invoice_numbers=explode("-",$order_invoice_number);
+            if($order_invoice_numbers[0]=='student_tuitions'){
+                $student_tuitions_id=$order_invoice_numbers[1];
+                $tuition = DB::table('student_tuitions')->where('id', $student_tuitions_id)->first();
 
-        // TODO: once a real gateway is integrated, parse $request and dispatch
-        // to the right handler, e.g. recordSchoolTransaction($school_id, 'tuition_payment',
-        // 'credit', $amount, ['reference_type' => 'student_tuitions', 'reference_id' => $tuitionId]).
+                // update student_tuition payment status
+                DB::table('student_tuitions')
+                    ->where('id', $student_tuitions_id)
+                    ->update([
+                        'status' => 'paid',
+                        'paid_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
+                // add new school_transaction
+                $amount = DB::table('student_tuitions_fees')->where('tuition_id', $student_tuitions_id)->sum('amount');
+
+                $student = DB::table('students')->where('id', $tuition->student_id)->first();
+                $class = DB::table('class_student')
+                    ->join('classes', 'classes.id', 'class_student.class_id')
+                    ->where('class_student.student_id', $tuition->student_id)
+                    ->select('classes.name')
+                    ->first();
+
+                recordSchoolTransaction($tuition->school_id, 'tuition_payment', 'credit', $amount, [
+                    'reference_type' => 'student_tuitions',
+                    'reference_id' => $student_tuitions_id,
+                    'description' => "Thanh toán học phí tháng {$tuition->month} năm {$tuition->year} - {$student->name} - Lớp {$class->name}",
+                ]);
+            }
+        }
+        
 
         return response()->json(['status' => 'ok']);
     }

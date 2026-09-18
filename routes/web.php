@@ -72,6 +72,7 @@ Route::middleware([
     Route::get('/admin/students/{student}/tuitions/{year}/{month}', [TuitionsController::class, 'show'])->where(['year' => '[0-9]+', 'month' => '[0-9]+'])->name('tuitions.show');
     Route::get('/admin/students/{student}/tuitions/{year}/{month}/create', [TuitionsController::class, 'create'])->where(['year' => '[0-9]+', 'month' => '[0-9]+'])->name('tuitions.create');
     Route::post('/admin/students/{student}/tuitions/{year}/{month}', [TuitionsController::class, 'store'])->where(['year' => '[0-9]+', 'month' => '[0-9]+'])->name('tuitions.store');
+    Route::any('/admin/students/{student}/tuitions/{year}/{month}/paid', [TuitionsController::class, 'paid'])->where(['year' => '[0-9]+', 'month' => '[0-9]+'])->name('tuitions.paid');
     Route::put('/admin/tuitions/{tuition}/status', [TuitionsController::class, 'updateStatus'])->name('tuitions.update_status');
     Route::get('/admin/tuition-fees/{fee}/edit', [TuitionsController::class, 'edit'])->name('tuition_fees.edit');
     Route::put('/admin/tuition-fees/{fee}', [TuitionsController::class, 'update'])->name('tuition_fees.update');

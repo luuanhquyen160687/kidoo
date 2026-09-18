@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use SePay\SePayClient;
+use SePay\Builders\CheckoutBuilder;
 
 class TuitionsController extends BaseController
 {
@@ -136,6 +138,9 @@ class TuitionsController extends BaseController
 
     public function show($student_id, $year, $month)
     {
+
+        $sepay = new SePayClient(env('SEPAY_MERCHANT_ID'), env('SEPAY_MERCHANT_SECRET'), 'production');
+
         $student = $this->findStudent($student_id);
         $tuition = $this->findOrCreateTuition($student_id, $year, $month);
         $this->findOrCreateClassFeeLine($tuition);
@@ -149,7 +154,27 @@ class TuitionsController extends BaseController
         $data['tuition'] = $tuition;
         $data['lines'] = $lines;
         $data['total'] = $lines->sum('amount');
+
+
+        $checkoutData = CheckoutBuilder::make()
+            ->currency('VND')
+            ->orderInvoiceNumber('student_tuitions-'.$tuition->id)
+            ->orderAmount(5000)
+            ->operation('PURCHASE')
+            ->orderDescription("Thanh toán học phí tháng {$tuition->month} năm {$tuition->year} - {$student->name}")
+            ->successUrl(route('tuitions.show', [$student_id, $year, $month]))
+            ->errorUrl(route('tuitions.show', [$student_id, $year, $month, 'payment' => 'error']))
+            ->cancelUrl(route('tuitions.show', [$student_id, $year, $month, 'payment' => 'cancel']))
+            ->build();
+        
+        
+        $data['sepay']=$sepay->checkout()->generateFormHtml($checkoutData);;
+
         return view('admin.tuitions.show', $data);
+    }
+    public function paid($student_id, $year, $month,Request $request)
+    {
+        print_r($request->input());
     }
 
     public function create($student_id, $year, $month)

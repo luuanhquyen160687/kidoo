@@ -52,8 +52,8 @@ return [
             'secret' => env('PAYMENT_WEBHOOK_SECRET'),
             'signature_header' => 'X-SePay-Signature',
             'signature_timestamp' => 'X-SePay-Timestamp',
-            'sepay_merchant_id'=>'sepay_merchant_id',
-            'sepay_merchant_secrete'=>'sepay_merchant_secrete'
+            'sepay_merchant_id' => env('SEPAY_MERCHANT_ID'),
+            'sepay_merchant_secrete' => env('SEPAY_MERCHANT_SECRET'),
         ],
     ],
 
